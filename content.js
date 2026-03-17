@@ -181,12 +181,15 @@ async function sendMessageViaAPI(phone, message, attachments = [], advancedSetti
   // Split message by lines and insert
   const lines = message.split('\n');
   for (let i = 0; i < lines.length; i++) {
-    // Insert text
-    document.execCommand('insertText', false, lines[i]);
+    // Insert text segment
+    if (lines[i].length > 0) {
+      document.execCommand('insertText', false, lines[i]);
+    }
     
     // Add line break if not last line
     if (i < lines.length - 1) {
-      document.execCommand('insertLineBreak');
+      // Using insertHTML with <br> is often more reliable for multiline in WA Web
+      document.execCommand('insertHTML', false, '<br>');
     }
   }
   
@@ -324,7 +327,17 @@ async function sendAttachments(attachments, message, settings) {
       captionBox.focus();
       await sleep(500);
       captionBox.textContent = '';
-      document.execCommand('insertText', false, message);
+      
+      // Use formatted insertion for newlines in caption
+      const segments = message.split('\n');
+      for (let i = 0; i < segments.length; i++) {
+        if (segments[i].length > 0) {
+          document.execCommand('insertText', false, segments[i]);
+        }
+        if (i < segments.length - 1) {
+          document.execCommand('insertHTML', false, '<br>');
+        }
+      }
       captionBox.dispatchEvent(new Event('input', { bubbles: true }));
       await sleep(settings.typingDelay);
     }
