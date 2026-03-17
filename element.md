@@ -44,5 +44,14 @@ Dokumen ini merangkum selector dan struktur elemen penting di WhatsApp Web yang 
 > [!TIP]
 > **Pro Tip for Marketing**: WhatsApp Web sering melakukan update pada class name-nya melalui proses obfuscation. Selalu gunakan `[data-testid]` atau atribut ARIA jika tersedia, karena atribut ini jauh lebih stabil dibandingkan class CSS biasa.
 
+## 🏷️ Label & Scraping Selectors
+| Fitur | Selector Utama | Deskripsi |
+|-------|----------------|-----------|
+| **Label Filter Tab** | `#labels-filter` | Button untuk membuka tab filter label. |
+| **Active Label Tab** | `#labels-filter[aria-pressed="true"]` | Menandakan tab filter label sedang aktif. |
+| **Filter Pill** | `div[role="button"] span[dir="auto"]` | Pill filter yang muncul di atas list chat (e.g. "New customer x"). |
+| **Chat Pane (Scroll)** | `#pane-side` | Container utama daftar chat yang discroll. |
+| **Chat Item** | `[role="listitem"]`, `[data-testid="cell-frame-container"]` | Baris chat individual dalam list. |
+
 > [!IMPORTANT]
 > Untuk mengirim pesan ke nomor baru tanpa menyimpannya, gunakan URL scheme: `https://web.whatsapp.com/send?phone=62812xxxxxx`.

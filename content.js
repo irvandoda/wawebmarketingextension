@@ -3,25 +3,41 @@ let currentStats = { total: 0, success: 0, failed: 0, failedNumbers: [] };
 
 // Listen for messages from popup
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.action === 'startSending') {
-    startBulkSending(request.contacts, request.message, request.delay, request.batchSize, request.attachments, request.advancedSettings);
-    sendResponse({ status: 'started' });
-  } else if (request.action === 'stopSending') {
-    isSending = false;
-    sendResponse({ status: 'stopped' });
-  } else if (request.action === 'exportGroup') {
-    exportGroupContacts();
-    sendResponse({ status: 'exported' });
-  } else if (request.action === 'exportLabel') {
-    exportLabelContacts();
-    sendResponse({ status: 'exported' });
-  } else if (request.action === 'exportChatlist') {
-    exportAllContacts();
-    sendResponse({ status: 'exported' });
-  } else if (request.action === 'ping') {
-    sendResponse({ status: 'pong' });
+  // Use a try-catch for robustness
+  try {
+    if (request.action === 'ping') {
+      sendResponse({ status: 'pong' });
+      return false;
+    }
+    
+    if (request.action === 'startSending') {
+      startBulkSending(request.contacts, request.message, request.delay, request.batchSize, request.attachments, request.advancedSettings);
+      sendResponse({ status: 'started' });
+    } else if (request.action === 'stopSending') {
+      isSending = false;
+      sendResponse({ status: 'stopped' });
+    } else if (request.action === 'exportGroup') {
+      exportGroupContacts();
+      sendResponse({ status: 'exported' });
+    } else if (request.action === 'exportLabel') {
+      exportLabelContacts();
+      sendResponse({ status: 'exported' });
+    } else if (request.action === 'exportChatlist') {
+      exportAllContacts();
+      sendResponse({ status: 'exported' });
+    } else if (request.action === 'SCRAPE_ACTIVE_LABEL') {
+      scrapeActiveLabel().then(results => {
+        sendResponse({ success: true, contacts: results });
+      }).catch(err => {
+        sendResponse({ success: false, error: err.message });
+      });
+      return true; // async
+    }
+  } catch (err) {
+    console.error('Error in content script listener:', err);
+    sendResponse({ success: false, error: err.message });
   }
-  return false; // No async response needed for these
+  return false; 
 });
 
 async function startBulkSending(contacts, messageTemplate, delay, batchSize, attachments = [], advancedSettings = {}) {
@@ -617,3 +633,96 @@ function logActivity(action, details) {
 // Initialize
 console.log('✅ WA Marketing Web - Content script loaded!');
 console.log('📱 Ready to send bulk messages on WhatsApp Web');
+
+/**
+ * Scrapes phone numbers from the active label filter.
+ */
+async function scrapeActiveLabel() {
+  logActivity('Scraper', 'Starting Contact Scraping...');
+  
+  // 1. Detect if we are in a filtered/labeled view
+  // First, try to find the active label button in the tab bar
+  const labelButton = document.querySelector('#labels-filter[aria-pressed="true"]');
+  
+  // Also check for the "filter pill" in the chat list header (e.g. "New customer x")
+  const filterPill = document.querySelector('div[role="button"] span[dir="auto"]'); // Generic search for pills
+  
+  if (!labelButton) {
+    console.warn('⚠️ Active label button not found. Will attempt to scrape current visible list as fallback.');
+  }
+
+  const chatListSide = document.querySelector('#pane-side');
+  if (!chatListSide) {
+    throw new Error('Gagal menemukan daftar chat (#pane-side). Pastikan WhatsApp Web sudah terbuka sempurna.');
+  }
+
+  const contactsSet = new Set();
+  let scrollAttempts = 0;
+  const maxAttempts = 50;
+
+  while (scrollAttempts < maxAttempts) {
+    // Look for items with role="listitem" OR role="row" OR testing IDs
+    const chatItems = chatListSide.querySelectorAll('[role="listitem"], [role="row"], [data-testid="cell-frame-container"]');
+    
+    if (chatItems.length === 0) {
+      console.warn('⚠️ No chat items found in current view. Checking container structure...');
+    }
+
+    // Log how many items we found to check selector accuracy
+    logActivity('Scraper', `Found ${chatItems.length} rows in the chat list container.`);
+
+    chatItems.forEach(item => {
+      // Find ALL numeric-like patterns in text and all attributes
+      const allText = item.innerText + ' ' + Array.from(item.attributes).map(a => a.value).join(' ');
+      
+      // Look for any string of 9 to 18 digits (optionally with separators)
+      const patterns = allText.match(/\+?[0-9][0-9\s\-\.\(\)\/]{8,25}[0-9]/g);
+      
+      if (patterns) {
+        patterns.forEach(match => {
+          const clean = match.replace(/[^0-9]/g, '');
+          // Standard WA numbers are 10-15 digits. Let's be slightly loose (9-16).
+          if (clean.length >= 9 && clean.length <= 16) {
+            contactsSet.add(clean);
+          }
+        });
+      }
+
+      // Deep search for title/aria-label in child elements
+      const children = item.querySelectorAll('*');
+      children.forEach(child => {
+        ['title', 'aria-label', 'data-testid'].forEach(attr => {
+          const val = child.getAttribute(attr);
+          if (val) {
+            const matches = val.match(/\+?[0-9][0-9\s\-\.\(\)\/]{8,25}[0-9]/g);
+            if (matches) {
+              matches.forEach(m => {
+                const c = m.replace(/[^0-9]/g, '');
+                if (c.length >= 9 && c.length <= 16) contactsSet.add(c);
+              });
+            }
+          }
+        });
+      });
+    });
+
+    logActivity('Scraper', `Status: ${contactsSet.size} unique contacts found so far.`);
+
+    const currentPos = chatListSide.scrollTop;
+    chatListSide.scrollTop += 650; 
+    await new Promise(r => setTimeout(r, 1000)); // Wait 1s for virtual rendering
+    
+    if (chatListSide.scrollTop === currentPos) {
+      scrollAttempts++;
+      if (scrollAttempts > 5) {
+        logActivity('Scraper', `Scraping finished. Total: ${contactsSet.size}`);
+        break; 
+      }
+    } else {
+      scrollAttempts = 0;
+    }
+  }
+
+  chatListSide.scrollTop = 0;
+  return Array.from(contactsSet);
+}

@@ -179,13 +179,35 @@ function stopSendingUI() {
 
 async function pingContentScript(tabId) {
   return new Promise((resolve) => {
-    chrome.tabs.sendMessage(tabId, { action: 'ping' }, (response) => {
-      if (chrome.runtime.lastError) {
-        resolve(false);
-      } else {
-        resolve(response && response.status === 'pong');
+    let resolved = false;
+    const timeout = setTimeout(() => {
+      if (!resolved) {
+        resolved = true;
+        resolve('timeout');
       }
-    });
+    }, 1500);
+
+    try {
+      chrome.tabs.sendMessage(tabId, { action: 'ping' }, (response) => {
+        if (resolved) return;
+        resolved = true;
+        clearTimeout(timeout);
+
+        if (chrome.runtime.lastError) {
+          resolve(chrome.runtime.lastError.message);
+        } else if (response && response.status === 'pong') {
+          resolve('ok');
+        } else {
+          resolve('Respon tidak valid');
+        }
+      });
+    } catch (e) {
+      if (!resolved) {
+        resolved = true;
+        clearTimeout(timeout);
+        resolve(e.message);
+      }
+    }
   });
 }
 
@@ -254,6 +276,56 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 });
 
+// Contact Scraper
+document.getElementById('btn-scrape-label').addEventListener('click', () => {
+  const statusBox = document.getElementById('scrape-status');
+  statusBox.textContent = '⏳ Scraping in progress... Please wait.';
+  statusBox.style.color = '#007bff';
+
+  chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
+    if (!tabs[0]) return;
+
+    // Check if content script is loaded
+    const pingStatus = await pingContentScript(tabs[0].id);
+    if (pingStatus !== 'ok') {
+      const errorDetail = pingStatus === 'timeout' ? 'Koneksi timeout' : (pingStatus || 'Script tidak terdeteksi');
+      alert(`⚠️ WhatsApp Web belum siap!\n\nDetail: ${errorDetail}\n\nSolusi:\n1. RELOAD halaman WhatsApp Web.\n2. Buka chrome://extensions dan klik icon "Reload" pada extension ini.`);
+      statusBox.textContent = 'Gagal menghubungkan ke WhatsApp Web.';
+      statusBox.style.color = '#dc3545';
+      return;
+    }
+
+    chrome.tabs.sendMessage(tabs[0].id, { action: 'SCRAPE_ACTIVE_LABEL' }, (response) => {
+      if (chrome.runtime.lastError) {
+        statusBox.innerHTML = `<span style="color: #dc3545;">❌ Error: ${chrome.runtime.lastError.message}</span>`;
+        return;
+      }
+
+      if (response && response.success) {
+        const numbers = response.contacts;
+        if (numbers && numbers.length > 0) {
+          const content = numbers.join('\n');
+          const blob = new Blob([content], { type: 'text/plain' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'contact.txt';
+          a.click();
+          URL.revokeObjectURL(url);
+
+          statusBox.innerHTML = `<span style="color: #28a745; font-weight: bold;">✅ Berhasil! ${numbers.length} kontak ditemukan.</span><br><small>File contact.txt otomatis diunduh.</small>`;
+        } else {
+          statusBox.innerHTML = `<span style="color: #ffc107;">⚠️ Tidak ada kontak ditemukan.</span><br><small>Buka console (F12) untuk melihat detail proses.</small>`;
+        }
+      } else {
+        const errorMsg = response ? response.error : 'Unknown error';
+        statusBox.innerHTML = `<span style="color: #dc3545;">❌ Scraping gagal: ${errorMsg}</span>`;
+      }
+    });
+  });
+});
+
+// Update stats display
 function updateStatsDisplay() {
   document.getElementById('totalSent').textContent = sendingStats.total;
   document.getElementById('successSent').textContent = sendingStats.success;
