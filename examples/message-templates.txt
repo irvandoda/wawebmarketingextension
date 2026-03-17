@@ -1,0 +1,78 @@
+# Message Templates untuk WA Marketing Web
+
+## Template 1: Personal Greeting
+Halo {{First-Name}}! 👋
+
+Kami dari [Nama Perusahaan] ingin menawarkan promo spesial untuk Anda.
+
+Dapatkan diskon 50% untuk pembelian pertama!
+
+Klik link ini: [link]
+
+Terima kasih!
+
+---
+
+## Template 2: Product Launch
+Hi {{Name}},
+
+Kami baru saja meluncurkan produk terbaru kami! 🎉
+
+[Deskripsi produk singkat]
+
+Khusus untuk Anda, kami berikan early bird discount 30%.
+
+Info lebih lanjut: [link]
+
+---
+
+## Template 3: Event Invitation
+Dear {{Name}},
+
+Kami mengundang Anda ke acara spesial kami:
+
+📅 Tanggal: [tanggal]
+🕐 Waktu: [waktu]
+📍 Lokasi: [lokasi]
+
+RSVP: [link]
+
+Sampai jumpa!
+
+---
+
+## Template 4: Follow Up
+Halo {{First-Name}},
+
+Terima kasih sudah menghubungi kami sebelumnya.
+
+Apakah Anda masih tertarik dengan [produk/layanan]?
+
+Kami siap membantu Anda. Silakan reply pesan ini.
+
+---
+
+## Template 5: Reminder
+Hi {{Name}},
+
+Ini adalah pengingat untuk:
+
+[Detail reminder]
+
+Jangan sampai terlewat!
+
+Hubungi kami: {{Phone}}
+
+---
+
+## Tips Personalisasi:
+- {{First-Name}} - Nama depan kontak
+- {{Name}} - Nama lengkap kontak
+- {{Phone}} - Nomor telepon kontak
+
+## Best Practices:
+1. Jaga pesan tetap singkat dan jelas
+2. Sertakan call-to-action yang jelas
+3. Personalisasi dengan nama kontak
+4. Hindari spam words
+5. Sertakan cara opt-out jika perlu

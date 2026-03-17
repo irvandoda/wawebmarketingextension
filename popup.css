@@ -1,0 +1,270 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  width: 450px;
+  min-height: 500px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  background: linear-gradient(135deg, #00b09b 0%, #25d366 100%);
+}
+
+.container {
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+header {
+  background: linear-gradient(135deg, #00b09b 0%, #25d366 100%);
+  color: white;
+  padding: 20px;
+}
+
+h1 {
+  font-size: 20px;
+  margin-bottom: 15px;
+}
+
+.tabs {
+  display: flex;
+  gap: 10px;
+}
+
+.tab {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.tab.active {
+  background: white;
+  color: #25d366;
+}
+
+.tab-content {
+  display: none;
+  padding: 20px;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+.section {
+  margin-bottom: 20px;
+}
+
+h3 {
+  font-size: 14px;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+textarea, input[type="number"] {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-family: inherit;
+  font-size: 13px;
+  resize: vertical;
+}
+
+input[type="file"] {
+  margin: 10px 0;
+  font-size: 12px;
+}
+
+button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.3s;
+}
+
+.btn-primary {
+  background: #25d366;
+  color: white;
+  width: 100%;
+  padding: 12px;
+  font-weight: bold;
+}
+
+.btn-primary:hover {
+  background: #20ba5a;
+}
+
+.btn-danger {
+  background: #dc3545;
+  color: white;
+  width: 100%;
+  padding: 12px;
+  font-weight: bold;
+}
+
+.btn-secondary {
+  background: #6c757d;
+  color: white;
+  margin: 5px;
+}
+
+.button-group {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.button-group button {
+  flex: 1;
+  padding: 10px;
+  font-size: 13px;
+}
+
+.personalization {
+  display: flex;
+  gap: 5px;
+  margin-top: 10px;
+}
+
+.insert-field {
+  background: #e7f5ec;
+  color: #25d366;
+  padding: 5px 10px;
+  font-size: 11px;
+  border: 1px solid #25d366;
+}
+
+label {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 13px;
+}
+
+.button-group {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.button-group button {
+  flex: 1;
+}
+
+.stats-container {
+  text-align: center;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 20px;
+  background: #e0e0e0;
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 15px 0;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #00b09b 0%, #25d366 100%);
+  width: 0%;
+  transition: width 0.3s;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  margin: 20px 0;
+}
+
+.stat-item {
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: bold;
+  color: #25d366;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: #666;
+  margin-top: 5px;
+}
+
+#attachmentList {
+  font-size: 12px;
+  color: #666;
+  margin-top: 5px;
+}
+
+/* Advanced Settings */
+details {
+  background: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-radius: 5px;
+  padding: 10px;
+  margin-top: 10px;
+}
+
+details summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: #25d366;
+  padding: 5px;
+  user-select: none;
+  list-style: none;
+}
+
+details summary::-webkit-details-marker {
+  display: none;
+}
+
+details summary::before {
+  content: '▶ ';
+  display: inline-block;
+  transition: transform 0.3s;
+}
+
+details[open] summary::before {
+  transform: rotate(90deg);
+}
+
+.advanced-settings {
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.advanced-settings label {
+  margin-bottom: 15px;
+  padding: 10px;
+  background: white;
+  border-radius: 5px;
+  border: 1px solid #e0e0e0;
+}
+
+.advanced-settings label small {
+  display: block;
+  color: #666;
+  font-size: 11px;
+  margin-top: 5px;
+  font-style: italic;
+}
+
+.advanced-settings input[type="number"] {
+  margin-top: 5px;
+  font-size: 12px;
+}

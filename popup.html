@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WA Marketing Web</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>WA Bulk Sender</h1>
+      <div class="tabs">
+        <button class="tab active" data-tab="simple">Simple</button>
+        <button class="tab" data-tab="export">Export</button>
+        <button class="tab" data-tab="statistics">Statistics</button>
+      </div>
+    </header>
+
+    <div id="simple-tab" class="tab-content active">
+      <div class="section">
+        <h3>Import Contacts</h3>
+        <div class="button-group">
+          <button id="downloadTemplate" class="btn-secondary">📥 Download Template</button>
+          <button id="importCsv" class="btn-secondary">📂 Import dari File</button>
+        </div>
+        <textarea id="contacts" placeholder="Masukkan nomor (dengan kode negara)&#10;Contoh:&#10;628123456789&#10;628987654321&#10;&#10;Atau download template CSV untuk format lengkap" rows="5"></textarea>
+        <input type="file" id="csvFile" accept=".csv,.xlsx,.txt" style="display:none;">
+      </div>
+
+      <div class="section">
+        <h3>Message Text</h3>
+        <textarea id="message" placeholder="Ketik pesan Anda di sini...&#10;&#10;Gunakan personalisasi:&#10;{{First-Name}} - Nama depan&#10;{{Name}} - Nama lengkap&#10;{{Phone}} - Nomor telepon" rows="6"></textarea>
+        <div class="personalization">
+          <button class="insert-field" data-field="{{First-Name}}">{{First-Name}}</button>
+          <button class="insert-field" data-field="{{Name}}">{{Name}}</button>
+          <button class="insert-field" data-field="{{Phone}}">{{Phone}}</button>
+        </div>
+      </div>
+
+      <div class="section">
+        <h3>Attachments (Optional)</h3>
+        <input type="file" id="attachments" multiple>
+        <div id="attachmentList"></div>
+      </div>
+
+      <div class="section">
+        <h3>Sending Settings</h3>
+        <label>
+          Delay between messages (seconds):
+          <input type="number" id="delay" value="5" min="3" max="60">
+        </label>
+        <label>
+          Batch size:
+          <input type="number" id="batchSize" value="10" min="1" max="50">
+        </label>
+      </div>
+
+      <div class="section">
+        <h3>Advanced Settings</h3>
+        <details>
+          <summary>⚙️ Timing Configuration (Click to expand)</summary>
+          <div class="advanced-settings">
+            <label>
+              Chat load delay (seconds):
+              <input type="number" id="chatLoadDelay" value="5" min="2" max="15" step="0.5">
+              <small>Waktu tunggu untuk membuka chat</small>
+            </label>
+            <label>
+              Input focus delay (seconds):
+              <input type="number" id="focusDelay" value="0.5" min="0.1" max="3" step="0.1">
+              <small>Waktu tunggu setelah fokus ke input box</small>
+            </label>
+            <label>
+              Typing delay (seconds):
+              <input type="number" id="typingDelay" value="0.8" min="0.3" max="5" step="0.1">
+              <small>Waktu tunggu setelah mengetik pesan</small>
+            </label>
+            <label>
+              Send delay (seconds):
+              <input type="number" id="sendDelay" value="2.5" min="1" max="10" step="0.5">
+              <small>Waktu tunggu setelah klik tombol kirim</small>
+            </label>
+            <label>
+              Attachment preview delay (seconds):
+              <input type="number" id="attachPreviewDelay" value="2" min="1" max="10" step="0.5">
+              <small>Waktu tunggu untuk preview attachment</small>
+            </label>
+            <label>
+              Attachment send delay (seconds):
+              <input type="number" id="attachSendDelay" value="3" min="1" max="15" step="0.5">
+              <small>Waktu tunggu setelah kirim attachment</small>
+            </label>
+            <label>
+              Element wait timeout (seconds):
+              <input type="number" id="elementTimeout" value="8" min="3" max="30" step="1">
+              <small>Timeout maksimal mencari elemen</small>
+            </label>
+          </div>
+        </details>
+      </div>
+
+      <button id="startSending" class="btn-primary">Start Sending</button>
+      <button id="stopSending" class="btn-danger" style="display:none;">Stop</button>
+    </div>
+
+    <div id="export-tab" class="tab-content">
+      <div class="section">
+        <h3>Export Info from Group</h3>
+        <button id="exportGroup">Export Group Contacts</button>
+      </div>
+      <div class="section">
+        <h3>Export Info from Label</h3>
+        <button id="exportLabel">Export Label Contacts</button>
+      </div>
+      <div class="section">
+        <h3>Export Info from ChatList</h3>
+        <button id="exportChatlist">Export All Contacts</button>
+      </div>
+    </div>
+
+    <div id="statistics-tab" class="tab-content">
+      <div class="stats-container">
+        <h3>Sending Progress</h3>
+        <div class="progress-bar">
+          <div id="progressFill" class="progress-fill"></div>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-item">
+            <div class="stat-value" id="totalSent">0</div>
+            <div class="stat-label">Total</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value" id="successSent">0</div>
+            <div class="stat-label">Sent Successfully</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value" id="failedSent">0</div>
+            <div class="stat-label">Failed</div>
+          </div>
+        </div>
+        <button id="exportResults" class="btn-secondary">Export Results</button>
+        <button id="retryFailed" class="btn-secondary">Retry Failed</button>
+      </div>
+    </div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>

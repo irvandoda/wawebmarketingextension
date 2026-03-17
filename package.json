@@ -1,0 +1,32 @@
+{
+  "name": "wamarketingweb",
+  "version": "1.0.0",
+  "description": "Simple, Safe WhatsApp Bulk Message Sender for WhatsApp Web",
+  "main": "background.js",
+  "scripts": {
+    "build": "echo 'Building extension...' && npm run zip",
+    "zip": "zip -r wamarketingweb.zip . -x '*.git*' 'node_modules/*' '*.zip' 'package*.json'",
+    "dev": "echo 'Load extension in browser developer mode'",
+    "lint": "echo 'No linting configured yet'"
+  },
+  "keywords": [
+    "whatsapp",
+    "bulk-sender",
+    "marketing",
+    "chrome-extension",
+    "browser-extension",
+    "whatsapp-web",
+    "bulk-message",
+    "automation"
+  ],
+  "author": "WA Marketing Web Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/wamarketingweb"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/wamarketingweb/issues"
+  },
+  "homepage": "https://github.com/yourusername/wamarketingweb#readme"
+}
