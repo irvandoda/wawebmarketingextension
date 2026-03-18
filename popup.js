@@ -12,16 +12,44 @@ document.querySelectorAll('.tab').forEach(tab => {
   });
 });
 
-// Insert personalization fields
-document.querySelectorAll('.insert-field').forEach(btn => {
+// Editor Toolbar Functions
+document.querySelectorAll('.format-btn').forEach(btn => {
   btn.addEventListener('click', () => {
-    const field = btn.dataset.field;
     const messageBox = document.getElementById('message');
-    const cursorPos = messageBox.selectionStart;
-    const textBefore = messageBox.value.substring(0, cursorPos);
-    const textAfter = messageBox.value.substring(cursorPos);
-    messageBox.value = textBefore + field + textAfter;
+    const startPos = messageBox.selectionStart;
+    const endPos = messageBox.selectionEnd;
+    const textBefore = messageBox.value.substring(0, startPos);
+    const selectedText = messageBox.value.substring(startPos, endPos);
+    const textAfter = messageBox.value.substring(endPos);
+    
+    let replacement = '';
+    let newCursorPos = startPos;
+    
+    if (btn.dataset.format) {
+      const format = btn.dataset.format;
+      let marker = '';
+      switch (format) {
+        case 'bold': marker = '*'; break;
+        case 'italic': marker = '_'; break;
+        case 'strikethrough': marker = '~'; break;
+        case 'monospace': marker = '```'; break;
+      }
+      
+      replacement = marker + selectedText + marker;
+      newCursorPos = startPos + marker.length + selectedText.length + marker.length;
+      
+      // If no text selected, put cursor between markers
+      if (startPos === endPos) {
+        newCursorPos = startPos + marker.length;
+      }
+    } else if (btn.dataset.field) {
+      replacement = btn.dataset.field;
+      newCursorPos = startPos + replacement.length;
+    }
+
+    messageBox.value = textBefore + replacement + textAfter;
     messageBox.focus();
+    messageBox.setSelectionRange(newCursorPos, newCursorPos);
   });
 });
 
@@ -125,8 +153,13 @@ document.getElementById('startSending').addEventListener('click', async () => {
 
       // Check if content script is loaded
       const isLoaded = await pingContentScript(tabs[0].id);
-      if (!isLoaded) {
-        alert('⚠️ WhatsApp Web belum siap!\n\nMohon REFRESH halaman WhatsApp Web Anda agar extension dapat terhubung kembali setelah pembaruan.');
+      if (isLoaded !== 'ok') {
+        console.warn('Content script ping failed with status:', isLoaded);
+        
+        // Attempt to reload the page automatically as a last resort
+        if (confirm('Ekstensi kehilangan koneksi ke WhatsApp Web (Background Terhibernasi).\nKlik OK untuk MERELOAD halaman otomatis dan tunggu 3 detik sebelum mencoba lagi.')) {
+          chrome.tabs.reload(tabs[0].id);
+        }
         stopSendingUI();
         return;
       }
@@ -180,34 +213,74 @@ function stopSendingUI() {
 async function pingContentScript(tabId) {
   return new Promise((resolve) => {
     let resolved = false;
+    // Increase timeout to 3 seconds for slower connections/heavy tabs
     const timeout = setTimeout(() => {
       if (!resolved) {
         resolved = true;
         resolve('timeout');
       }
-    }, 1500);
+    }, 3000);
 
-    try {
-      chrome.tabs.sendMessage(tabId, { action: 'ping' }, (response) => {
-        if (resolved) return;
-        resolved = true;
-        clearTimeout(timeout);
-
-        if (chrome.runtime.lastError) {
-          resolve(chrome.runtime.lastError.message);
-        } else if (response && response.status === 'pong') {
-          resolve('ok');
-        } else {
-          resolve('Respon tidak valid');
+    const tryPing = () => {
+      try {
+        chrome.tabs.sendMessage(tabId, { action: 'ping' }, (response) => {
+          if (resolved) return;
+          
+          if (chrome.runtime.lastError) {
+            console.warn("Ping error:", chrome.runtime.lastError.message);
+            
+            // Auto inject script if receiving end does not exist
+            if (chrome.runtime.lastError.message.includes('Receiving end does not exist') || 
+                chrome.runtime.lastError.message.includes('Could not establish connection')) {
+              console.log("Attempting to auto-inject content script...");
+              if (chrome.scripting) {
+                 chrome.scripting.executeScript({
+                   target: { tabId: tabId },
+                   files: ['content.js']
+                 }).then(() => {
+                    console.log("Injection successful, retrying ping...");
+                    setTimeout(() => {
+                      chrome.tabs.sendMessage(tabId, { action: 'ping' }, (res) => {
+                         resolved = true;
+                         clearTimeout(timeout);
+                         if (chrome.runtime.lastError) resolve(chrome.runtime.lastError.message);
+                         else if (res && res.status === 'pong') resolve('ok');
+                         else resolve('Respon tidak valid');
+                      });
+                    }, 500);
+                 }).catch(err => {
+                    resolved = true;
+                    clearTimeout(timeout);
+                    resolve('Gagal inject script: ' + err.message);
+                 });
+                 return; // wait for injection
+              }
+            }
+            
+            resolved = true;
+            clearTimeout(timeout);
+            resolve(chrome.runtime.lastError.message);
+          } else if (response && response.status === 'pong') {
+            resolved = true;
+            clearTimeout(timeout);
+            resolve('ok');
+          } else {
+            resolved = true;
+            clearTimeout(timeout);
+            resolve('Respon tidak valid');
+          }
+        });
+      } catch (e) {
+        if (!resolved) {
+          resolved = true;
+          clearTimeout(timeout);
+          console.error("Ping exception:", e);
+          resolve(e.message);
         }
-      });
-    } catch (e) {
-      if (!resolved) {
-        resolved = true;
-        clearTimeout(timeout);
-        resolve(e.message);
       }
-    }
+    };
+    
+    tryPing();
   });
 }
 

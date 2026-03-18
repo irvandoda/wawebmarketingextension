@@ -31,11 +31,18 @@
 
       <div class="section">
         <h3>Message Text</h3>
-        <textarea id="message" placeholder="Ketik pesan Anda di sini...&#10;&#10;Gunakan personalisasi:&#10;{{First-Name}} - Nama depan&#10;{{Name}} - Nama lengkap&#10;{{Phone}} - Nomor telepon" rows="6"></textarea>
-        <div class="personalization">
-          <button class="insert-field" data-field="{{First-Name}}">{{First-Name}}</button>
-          <button class="insert-field" data-field="{{Name}}">{{Name}}</button>
-          <button class="insert-field" data-field="{{Phone}}">{{Phone}}</button>
+        <div class="editor-container">
+          <div class="editor-toolbar">
+            <button class="format-btn" data-format="bold" title="Bold (*text*)"><b>B</b></button>
+            <button class="format-btn" data-format="italic" title="Italic (_text_)"><i>I</i></button>
+            <button class="format-btn" data-format="strikethrough" title="Strikethrough (~text~)"><s>S</s></button>
+            <button class="format-btn" data-format="monospace" title="Monospace (```text```)"><code style="font-family:monospace;">M</code></button>
+            <div class="toolbar-divider"></div>
+            <button class="insert-field format-btn" data-field="{{First-Name}}" title="Insert First Name">{{First-Name}}</button>
+            <button class="insert-field format-btn" data-field="{{Name}}" title="Insert Full Name">{{Name}}</button>
+            <button class="insert-field format-btn" data-field="{{Phone}}" title="Insert Phone">{{Phone}}</button>
+          </div>
+          <textarea id="message" class="premium-textarea" placeholder="Ketik pesan Anda di sini...&#10;&#10;Fitur Format:&#10;Blok teks lalu klik tombol B/I/S/M di atas untuk mengubah format teks." rows="8"></textarea>
         </div>
       </div>
 

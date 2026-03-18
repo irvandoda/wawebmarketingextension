@@ -175,21 +175,26 @@ async function sendMessageViaAPI(phone, message, attachments = [], advancedSetti
   inputBox.focus();
   await sleep(settings.focusDelay);
   
-  // Type message - simulate real typing
-  inputBox.textContent = '';
+  // Very robust approach for Lexical/React editors (Production Grade)
+  inputBox.focus();
   
-  // Split message by lines and insert
   const lines = message.split('\n');
   for (let i = 0; i < lines.length; i++) {
-    // Insert text segment
-    if (lines[i].length > 0) {
-      document.execCommand('insertText', false, lines[i]);
-    }
+    await new Promise(r => setTimeout(r, 50));
     
-    // Add line break if not last line
+    // Ketik per baris
+    document.execCommand('insertText', false, lines[i]);
+    
+    // Simulasi SHIFT + ENTER jika bukan baris terakhir
     if (i < lines.length - 1) {
-      // Using insertHTML with <br> is often more reliable for multiline in WA Web
-      document.execCommand('insertHTML', false, '<br>');
+      inputBox.dispatchEvent(new KeyboardEvent('keydown', {
+        key: 'Enter',
+        code: 'Enter',
+        keyCode: 13,
+        which: 13,
+        shiftKey: true,
+        bubbles: true
+      }));
     }
   }
   
@@ -328,16 +333,29 @@ async function sendAttachments(attachments, message, settings) {
       await sleep(500);
       captionBox.textContent = '';
       
-      // Use formatted insertion for newlines in caption
+      // Very robust approach for Lexical/React editors (Production Grade)
+      captionBox.focus();
+      
       const segments = message.split('\n');
       for (let i = 0; i < segments.length; i++) {
-        if (segments[i].length > 0) {
-          document.execCommand('insertText', false, segments[i]);
-        }
+        await new Promise(r => setTimeout(r, 50));
+        
+        // Ketik per baris
+        document.execCommand('insertText', false, segments[i]);
+        
+        // Simulasi SHIFT + ENTER jika bukan baris terakhir
         if (i < segments.length - 1) {
-          document.execCommand('insertHTML', false, '<br>');
+          captionBox.dispatchEvent(new KeyboardEvent('keydown', {
+            key: 'Enter',
+            code: 'Enter',
+            keyCode: 13,
+            which: 13,
+            shiftKey: true,
+            bubbles: true
+          }));
         }
       }
+      
       captionBox.dispatchEvent(new Event('input', { bubbles: true }));
       await sleep(settings.typingDelay);
     }

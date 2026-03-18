@@ -129,18 +129,77 @@ button {
   font-size: 13px;
 }
 
-.personalization {
-  display: flex;
-  gap: 5px;
-  margin-top: 10px;
+.editor-container {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+  background: white;
+  margin-bottom: 5px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
-.insert-field {
+.editor-toolbar {
+  display: flex;
+  background: #f8f9fa;
+  padding: 8px;
+  border-bottom: 1px solid #ddd;
+  gap: 5px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.format-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  padding: 5px 8px;
+  cursor: pointer;
+  color: #555;
+  transition: all 0.2s;
+  font-size: 13px;
+}
+
+.format-btn:hover {
+  background: #e9ecef;
+  border-color: #ddd;
+  color: #25d366;
+}
+
+.toolbar-divider {
+  width: 1px;
+  height: 20px;
+  background: #ccc;
+  margin: 0 5px;
+}
+
+.insert-field.format-btn {
   background: #e7f5ec;
   color: #25d366;
-  padding: 5px 10px;
-  font-size: 11px;
   border: 1px solid #25d366;
+  font-size: 11px;
+  padding: 4px 8px;
+}
+
+.insert-field.format-btn:hover {
+  background: #25d366;
+  color: white;
+}
+
+.premium-textarea {
+  width: 100%;
+  border: none;
+  padding: 12px;
+  font-size: 14px;
+  resize: vertical;
+  min-height: 120px;
+  outline: none;
+  font-family: inherit;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.premium-textarea:focus {
+  background-color: #fcfcfc;
 }
 
 label {
